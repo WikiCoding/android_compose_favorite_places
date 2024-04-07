@@ -145,6 +145,18 @@ fun EditView(navHostController: NavHostController, id: Int, mainViewModel: MainV
                 )
             )
 
+            Button(modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp), onClick = {
+                photoFromGalleryLauncher.launch(
+                    PickVisualMediaRequest(
+                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                    )
+                )
+            }) {
+                Text(text = "Edit photo")
+            }
+
             AsyncImage(
                 model = mainViewModel.elementStateImage,
                 contentDescription = "imageFromWeb",
@@ -172,18 +184,6 @@ fun EditView(navHostController: NavHostController, id: Int, mainViewModel: MainV
 //                    unfocusedLabelColor = MaterialTheme.colorScheme.primary
 //                )
 //            )
-
-            Button(modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp), onClick = {
-                photoFromGalleryLauncher.launch(
-                    PickVisualMediaRequest(
-                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
-                    )
-                )
-            }) {
-                Text(text = "Edit photo")
-            }
         }
     }
 }

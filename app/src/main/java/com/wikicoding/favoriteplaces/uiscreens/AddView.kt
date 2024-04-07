@@ -136,17 +136,6 @@ fun AddView(navHostController: NavHostController, mainViewModel: MainViewModel) 
                 )
             )
 
-            AsyncImage(
-                model = placeImageUrlState, contentDescription = null, modifier = Modifier
-                    .weight(1f)
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(8.dp)),
-                placeholder = painterResource(id = R.drawable.baseline_photo_camera_24),
-                error = painterResource(id = R.drawable.baseline_hide_image_24)
-            )
-
-            Log.e("img", placeImageUrlState)
-
             Button(modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp), onClick = {
@@ -158,6 +147,15 @@ fun AddView(navHostController: NavHostController, mainViewModel: MainViewModel) 
             }) {
                 Text(text = "Add photo from Gallery")
             }
+
+            AsyncImage(
+                model = placeImageUrlState, contentDescription = null, modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(8.dp)),
+                placeholder = painterResource(id = R.drawable.baseline_photo_camera_24),
+                error = painterResource(id = R.drawable.baseline_hide_image_24)
+            )
 
 //            Button(onClick = {
 //
