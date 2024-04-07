@@ -1,8 +1,16 @@
 package com.wikicoding.favoriteplaces.uiscreens
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.LocationManager
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -34,28 +42,30 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.wikicoding.favoriteplaces.R
 import com.wikicoding.favoriteplaces.imageservice.ImgSharedPrefs
 import com.wikicoding.favoriteplaces.data.PlaceElement
 import com.wikicoding.favoriteplaces.viewmodel.MainViewModel
+import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun EditView(navHostController: NavHostController, id: Int, mainViewModel: MainViewModel) {
     val currPlace = mainViewModel.findById(id).collectAsState(
         initial = PlaceElement(0, "", "", "", 0.0, 0.0, ""))
 
-    val placeObject = mainViewModel.elementsState.collectAsState().value
-
     mainViewModel.elementStateName = currPlace.value.name
     mainViewModel.elementStateDescription = currPlace.value.description
     mainViewModel.elementStateAddress = currPlace.value.address
     mainViewModel.elementStateImage = currPlace.value.photoUri
-
+    mainViewModel.elementStateLatitude = currPlace.value.lat
+    mainViewModel.elementStateLongitude = currPlace.value.lng
     val context = LocalContext.current.applicationContext
-
-    var placeImageUrlState by remember { mutableStateOf(placeObject.image) }
 
     val scaffoldState = rememberScaffoldState()
 
@@ -78,8 +88,8 @@ fun EditView(navHostController: NavHostController, id: Int, mainViewModel: MainV
                         mainViewModel.elementStateName,
                         mainViewModel.elementStateDescription,
                         mainViewModel.elementStateAddress,
-                        0.0,
-                        0.0,
+                        mainViewModel.elementStateLatitude,
+                        mainViewModel.elementStateLongitude,
                         mainViewModel.elementStateImage
                     )
                 )
@@ -145,6 +155,50 @@ fun EditView(navHostController: NavHostController, id: Int, mainViewModel: MainV
                 )
             )
 
+
+            Button(
+                onClick = {
+                    val fusedLocationClient: FusedLocationProviderClient =
+                        LocationServices.getFusedLocationProviderClient(context)
+
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        Toast.makeText(
+                            context,
+                            "Permissions for Location not granted!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        location?.let { loc ->
+                            mainViewModel.elementStateLatitude = loc.latitude
+                            mainViewModel.elementStateLongitude = loc.longitude
+                            Geocoder(context, Locale.getDefault())
+                                .getFromLocation(
+                                    mainViewModel.elementStateLatitude,
+                                    mainViewModel.elementStateLongitude,
+                                    1,
+                                    Geocoder.GeocodeListener { addr ->
+                                        mainViewModel.elementStateAddress = addr[0].getAddressLine(0)
+                                    })
+                        }
+                    }
+
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(text = "Get my Current Location")
+            }
+
             Button(modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp), onClick = {
@@ -168,22 +222,6 @@ fun EditView(navHostController: NavHostController, id: Int, mainViewModel: MainV
                 placeholder = painterResource(id = R.drawable.baseline_photo_camera_24),
                 error = painterResource(id = R.drawable.baseline_hide_image_24),
             )
-
-//            OutlinedTextField(
-//                value = mainViewModel.elementStateImage,
-//                onValueChange = { mainViewModel.onImageChange(it) },
-//                label = { Text(text = "Place Image Url") },
-//                singleLine = false,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(8.dp),
-//                colors = TextFieldDefaults.outlinedTextFieldColors(
-//                    textColor = MaterialTheme.colorScheme.primary,
-//                    backgroundColor = MaterialTheme.colorScheme.background,
-//                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-//                    unfocusedLabelColor = MaterialTheme.colorScheme.primary
-//                )
-//            )
         }
     }
 }

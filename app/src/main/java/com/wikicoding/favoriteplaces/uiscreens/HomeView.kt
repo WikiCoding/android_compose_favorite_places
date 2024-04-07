@@ -1,10 +1,6 @@
 package com.wikicoding.favoriteplaces.uiscreens
 
 import android.Manifest
-import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wikicoding.favoriteplaces.data.PlaceElement
 import com.wikicoding.favoriteplaces.navigation.Screen
+import com.wikicoding.favoriteplaces.permissions.RequestPermissions
 import com.wikicoding.favoriteplaces.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -55,12 +52,12 @@ import com.wikicoding.favoriteplaces.viewmodel.MainViewModel
 fun HomeView(navController: NavHostController, mainViewModel: MainViewModel) {
     val elements = mainViewModel.getAll.collectAsState(initial = listOf())
 
-//    val permissionsToRequest = arrayOf(
-//        Manifest.permission.ACCESS_COARSE_LOCATION,
-//        Manifest.permission.ACCESS_FINE_LOCATION
-//    )
+    val permissionsToRequest = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
-//    val multiplePermissionResultLauncher = RequestPermissions(mainViewModel = mainViewModel)
+    val multiplePermissionResultLauncher = RequestPermissions(mainViewModel = mainViewModel)
 
     val scaffoldState = rememberScaffoldState()
 
@@ -73,7 +70,8 @@ fun HomeView(navController: NavHostController, mainViewModel: MainViewModel) {
         }) {
         var swipedElement by remember { mutableStateOf<PlaceElement?>(null) }
         var showDialog by remember { mutableStateOf(false) }
-//        multiplePermissionResultLauncher.launch(permissionsToRequest)
+        multiplePermissionResultLauncher.launch(permissionsToRequest)
+
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(0.8f)) {
                 LazyColumn(
@@ -183,25 +181,3 @@ fun HomeView(navController: NavHostController, mainViewModel: MainViewModel) {
         }
     }
 }
-
-//@Composable
-//fun RequestPermissions(mainViewModel: MainViewModel): ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>> {
-//    val permissionsToRequest = arrayOf(
-//        Manifest.permission.ACCESS_COARSE_LOCATION,
-//        Manifest.permission.ACCESS_FINE_LOCATION
-//    )
-//
-//    val multiplePermissionResultLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.RequestMultiplePermissions(),
-//        onResult = { permissions ->
-//            permissionsToRequest.forEach { permission ->
-//                mainViewModel.onPermissionResult(
-//                    permission = permission,
-//                    isGranted = permissions[permission] == true
-//                )
-//            }
-//        }
-//    )
-//
-//    return multiplePermissionResultLauncher
-//}

@@ -20,6 +20,9 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val placesRepository: PlacesRepository = DbGraph.placesRepository
 ) : ViewModel() {
+    var elementStateLatitude by mutableStateOf(0.0)
+    var elementStateLongitude by mutableStateOf(0.0)
+
     private val _elementsState = MutableStateFlow(SingleElementState())
     val elementsState = _elementsState.asStateFlow()
     var elementStateName by mutableStateOf("")
@@ -73,18 +76,18 @@ class MainViewModel(
         elementStateImage = it
     }
 
-//    val visiblePermissionDialogQueue = mutableStateListOf<String>()
-//
-//    fun dismissDialog() {
-//        visiblePermissionDialogQueue.removeFirst()
-//    }
-//
-//    fun onPermissionResult(
-//        permission: String,
-//        isGranted: Boolean
-//    ) {
-//        if (!isGranted && !visiblePermissionDialogQueue.contains(permission)) {
-//            visiblePermissionDialogQueue.add(permission)
-//        }
-//    }
+    val visiblePermissionDialogQueue = mutableStateListOf<String>()
+
+    fun dismissDialog() {
+        visiblePermissionDialogQueue.removeFirst()
+    }
+
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean
+    ) {
+        if (!isGranted && !visiblePermissionDialogQueue.contains(permission)) {
+            visiblePermissionDialogQueue.add(permission)
+        }
+    }
 }
